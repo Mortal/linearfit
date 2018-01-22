@@ -37,14 +37,17 @@ def main():
     params_l2, _residuals, _rank, _s = np.linalg.lstsq(data, noise_labels, rcond=None)
     print(res)
     params_l1 = res.x
+    print('')
     print('L1-param:', params_l1)
-    print('L1-param L1-score:', l1(params_l1, data, noise_labels))
-    print('L1-param L2-score:', l2(params_l1, data, noise_labels))
     print('L2-param:', params_l2.reshape(-1))
-    print('L2-param L1-score:', l1(params_l2, data, noise_labels))
-    print('L1-param L2-score:', l2(params_l2, data, noise_labels))
     print('Real param:', real_params.reshape(-1))
+    print('')
+    print('L1-param L1-score:', l1(params_l1, data, noise_labels))
+    print('L2-param L1-score:', l1(params_l2, data, noise_labels))
     print('Real L1-score:', l1(real_params, data, noise_labels))
+    print('')
+    print('L1-param L2-score:', l2(params_l1, data, noise_labels))
+    print('L2-param L2-score:', l2(params_l2, data, noise_labels))
     print('Real L2-score:', l2(real_params, data, noise_labels))
 
 
