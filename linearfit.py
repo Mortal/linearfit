@@ -7,10 +7,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42)
 
 
+# d/dw_i |sum(x_j w_j) - y|
+
 def l1(params, data, weights, labels):
     prediction = np.dot(data, params.reshape(-1, 1))
     dist = prediction - labels
-    return (weights * np.abs(dist)).sum()
+    assert dist.shape == (data.shape[0], 1)
+    abs_dist = np.abs(dist)
+    sign_dist = np.sign(dist)
+    sign_data = np.sign(data)
+    return (weights * abs_dist).sum(), (weights.reshape(-1, 1) * (sign_dist * sign_data)).sum(axis=0)
 
 
 def l2(params, data, weights, labels):
@@ -35,14 +41,14 @@ def main():
     assert noise_labels.shape == (n, 1)
 
     initial_params = np.zeros(d)
-    res = minimize(l1, initial_params, args=(data, weights, noise_labels))
+    res = minimize(l1, initial_params, args=(data, weights, noise_labels), jac=True)
     params_l2, _residuals, _rank, _s = np.linalg.lstsq(
         data * weights.reshape(-1, 1), noise_labels * weights.reshape(-1, 1),
         rcond=None)
     print(res)
     params_l1 = res.x
-    l1_l1 = l1(params_l1, data, weights, noise_labels)
-    l2_l1 = l1(params_l2, data, weights, noise_labels)
+    l1_l1 = l1(params_l1, data, weights, noise_labels)[0]
+    l2_l1 = l1(params_l2, data, weights, noise_labels)[0]
     l1_l2 = l2(params_l1, data, weights, noise_labels)
     l2_l2 = l2(params_l2, data, weights, noise_labels)
     print('')
