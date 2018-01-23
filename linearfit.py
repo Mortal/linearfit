@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42)
 
 
-# d/dw_i |sum(x_j w_j) - y|
+# d/dw_i |sum(x_j w_j) - y| = x_i sgn(sum(x_j w_j) - y)
 
 def l1(params, data, weights, labels):
     prediction = np.dot(data, params.reshape(-1, 1))
@@ -15,8 +15,7 @@ def l1(params, data, weights, labels):
     assert dist.shape == (data.shape[0], 1)
     abs_dist = np.abs(dist)
     sign_dist = np.sign(dist)
-    sign_data = np.sign(data)
-    return (weights * abs_dist).sum(), (weights.reshape(-1, 1) * (sign_dist * sign_data)).sum(axis=0)
+    return (weights * abs_dist).sum(), (weights.reshape(-1, 1) * (sign_dist * data)).sum(axis=0)
 
 
 def l2(params, data, weights, labels):
