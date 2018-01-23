@@ -43,7 +43,7 @@ def main():
     assert noise_labels.shape == (n, 1)
 
     initial_params = np.zeros(d)
-    res = minimize(l1, initial_params, args=(data, weights, noise_labels), jac=True)
+    res = minimize(l1, initial_params, args=(data, weights, noise_labels), jac=True, method='SLSQP')
     params_l2, _residuals, _rank, _s = np.linalg.lstsq(
         data * weights.reshape(-1, 1), noise_labels * weights.reshape(-1, 1),
         rcond=None)
