@@ -9,13 +9,16 @@ parser.add_argument('--seed', type=int, default=42)
 
 # d/dw_i |sum(x_j w_j) - y| = x_i sgn(sum(x_j w_j) - y)
 
-def l1(params, data, weights, labels):
+def l1(params, data, weights, labels, jac=True):
     prediction = np.dot(data, params.reshape(-1, 1))
     dist = prediction - labels
     assert dist.shape == (data.shape[0], 1)
     abs_dist = np.abs(dist)
+    weighted_sum = (weights * abs_dist).sum()
+    if not jac:
+        return weighted_sum
     sign_dist = np.sign(dist)
-    return (weights * abs_dist).sum(), (weights.reshape(-1, 1) * (sign_dist * data)).sum(axis=0)
+    return weighted_sum, (weights.reshape(-1, 1) * (sign_dist * data)).sum(axis=0)
 
 
 def l2(params, data, weights, labels):
@@ -46,8 +49,8 @@ def main():
         rcond=None)
     print(res)
     params_l1 = res.x
-    l1_l1 = l1(params_l1, data, weights, noise_labels)[0]
-    l2_l1 = l1(params_l2, data, weights, noise_labels)[0]
+    l1_l1 = l1(params_l1, data, weights, noise_labels, jac=False)
+    l2_l1 = l1(params_l2, data, weights, noise_labels, jac=False)
     l1_l2 = l2(params_l1, data, weights, noise_labels)
     l2_l2 = l2(params_l2, data, weights, noise_labels)
     print('')
@@ -57,7 +60,7 @@ def main():
     print('')
     print('L1-param L1-score:', l1_l1)
     print('L2-param L1-score:', l2_l1)
-    print('Real L1-score:', l1(real_params, data, weights, noise_labels))
+    print('Real L1-score:', l1(real_params, data, weights, noise_labels, jac=False))
     print('')
     print('L1-param L2-score:', l1_l2)
     print('L2-param L2-score:', l2_l2)
